@@ -6,6 +6,7 @@ import recipe.project.recipe.domain.Recipe;
 import recipe.project.recipe.repositories.RecipeRepository;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -27,5 +28,12 @@ public class RecipeServiceImpl implements RecipeService {
         all.iterator().forEachRemaining(recipeSet::add);
 
         return recipeSet;
+    }
+
+    @Override
+    public Recipe findById(Long id) {
+        Optional<Recipe> optionalRecipe = recipeRepository.findById(id);
+        return optionalRecipe.orElseThrow(() -> new RuntimeException("Recipe with id: " + id + " not found!"));
+
     }
 }
