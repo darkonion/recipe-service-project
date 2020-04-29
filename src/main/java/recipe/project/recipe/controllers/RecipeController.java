@@ -2,8 +2,11 @@ package recipe.project.recipe.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import recipe.project.recipe.command.RecipeCommand;
 import recipe.project.recipe.services.RecipeService;
 
 @Controller
@@ -15,11 +18,32 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
-    @RequestMapping("/recipe/show/{id}")
+    @RequestMapping("/recipe/{id}/show")
     public String showById(@PathVariable("id") Long id, Model model) {
 
         model.addAttribute("recipe", recipeService.findById(id));
 
         return "recipe/show";
+    }
+
+    @RequestMapping("/recipe/new")
+    public String newRecipe(Model model) {
+        model.addAttribute("recipe", new RecipeCommand());
+
+        return "recipe/recipeform";
+    }
+
+    @PostMapping("/recipe")
+    public String saveOrUpdate(@ModelAttribute RecipeCommand recipeCommand) {
+        RecipeCommand savedCommand = recipeService.saveRecipeCommand(recipeCommand);
+
+        return "redirect:/recipe/" + savedCommand.getId() + "/show";
+    }
+
+    @RequestMapping("recipe/{id}/update")
+    public String updateRecipe(@PathVariable Long id, Model model) {
+        RecipeCommand byId = recipeService.findCommandById(id);
+        model.addAttribute("recipe", byId);
+        return "recipe/recipeform";
     }
 }
