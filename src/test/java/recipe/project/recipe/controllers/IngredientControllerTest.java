@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import recipe.project.recipe.command.IngredientCommand;
 import recipe.project.recipe.command.RecipeCommand;
 import recipe.project.recipe.command.UnitOfMeasureCommand;
+import recipe.project.recipe.domain.Recipe;
 import recipe.project.recipe.services.IngredientService;
 import recipe.project.recipe.services.RecipeService;
 import recipe.project.recipe.services.UnitOfMeasureService;
@@ -114,7 +115,33 @@ class IngredientControllerTest {
                 .andExpect(view().name("redirect:/recipe/4/ingredient/2/show"));
 
         verify(ingredientService, times(1)).saveIngredientCommand(any());
+    }
 
+    @Test
+    void newIngredientForm() throws Exception {
+        Recipe rc = new Recipe();
+        rc.setId(1L);
+        Set<UnitOfMeasureCommand> uoms = new HashSet<>();
+
+        when(unitOfMeasureService.listAllUoms()).thenReturn(uoms);
+
+        mockMvc.perform(get("/recipe/1/ingredient/new"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("recipe/ingredient/ingredientform"))
+                .andExpect(model().attributeExists("ingredient", "uomList"));
+
+        verify(unitOfMeasureService, times(1)).listAllUoms();
+
+    }
+
+    @Test
+    void deleteById() throws Exception {
+
+        mockMvc.perform(get("/recipe/4/ingredient/2/delete"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/recipe/4/ingredients"));
+
+        verify(ingredientService, times(1)).deleteById(anyLong(), anyLong());
 
     }
 }

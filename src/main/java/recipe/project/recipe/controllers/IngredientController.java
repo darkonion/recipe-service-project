@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import recipe.project.recipe.command.IngredientCommand;
+import recipe.project.recipe.command.UnitOfMeasureCommand;
 import recipe.project.recipe.services.IngredientService;
 import recipe.project.recipe.services.RecipeService;
 import recipe.project.recipe.services.UnitOfMeasureService;
@@ -55,6 +56,24 @@ public class IngredientController {
         return "recipe/ingredient/show";
     }
 
+    @GetMapping("/recipe/{recipeId}/ingredient/new")
+    public String newIngredientForm(@PathVariable Long recipeId, Model model) {
+        log.debug("Creating new ingredient for recipe " + recipeId);
+
+        //todo what if recipeId is incorrect
+
+        IngredientCommand ingredientCommand = new IngredientCommand();
+        ingredientCommand.setRecipeId(recipeId);
+
+        model.addAttribute("ingredient", ingredientCommand);
+
+        ingredientCommand.setUom(new UnitOfMeasureCommand());
+
+        model.addAttribute("uomList", unitOfMeasureService.listAllUoms());
+
+        return "recipe/ingredient/ingredientform";
+    }
+
     @PostMapping("/recipe/{recipeId}/ingredient")
     public String saveOrUpdate(@PathVariable Long recipeId, @ModelAttribute IngredientCommand ingredientCommand) {
 
@@ -64,5 +83,13 @@ public class IngredientController {
         log.debug("saved ingredient id:" + savedCommand.getId());
 
         return "redirect:/recipe/" + savedCommand.getRecipeId() + "/ingredient/" + savedCommand.getId() + "/show";
+    }
+
+    @GetMapping("/recipe/{recipeId}/ingredient/{id}/delete")
+    public String deletebyId(@PathVariable Long recipeId, @PathVariable Long id) {
+        log.debug("Deleting ingredient " + id + " from recipe " + recipeId);
+        ingredientService.deleteById(recipeId, id);
+
+        return "redirect:/recipe/" + recipeId + "/ingredients";
     }
 }

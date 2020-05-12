@@ -78,26 +78,45 @@ class IngredientServiceImplTest {
 
     @Test
     void saveIngredientCommand() {
-        Recipe recipe = new Recipe();
+        IngredientCommand command = new IngredientCommand();
+        command.setId(3L);
+        command.setRecipeId(2L);
+
+        Optional<Recipe> recipeOptional = Optional.of(new Recipe());
 
         Recipe savedRecipe = new Recipe();
         savedRecipe.addIngredient(new Ingredient());
-        savedRecipe.getIngredients().iterator().next().setId(2L);
-        savedRecipe.setId(3L);
+        savedRecipe.getIngredients().iterator().next().setId(3L);
 
-        IngredientCommand command = new IngredientCommand();
-        command.setId(2L);
-        command.setRecipeId(3L);
-
-        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
+        when(recipeRepository.findById(anyLong())).thenReturn(recipeOptional);
         when(recipeRepository.save(any())).thenReturn(savedRecipe);
 
+        //when
         IngredientCommand savedCommand = ingredientService.saveIngredientCommand(command);
 
-        assertEquals(2L, savedCommand.getId());
-        assertEquals(3L, savedCommand.getRecipeId());
+        //then
+        assertEquals(Long.valueOf(3L), savedCommand.getId());
         verify(recipeRepository, times(1)).findById(anyLong());
         verify(recipeRepository, times(1)).save(any(Recipe.class));
 
+
+    }
+
+    @Test
+    void deleteById() {
+        Recipe recipe = new Recipe();
+        recipe.setId(1L);
+        Ingredient ingredient = new Ingredient();
+        ingredient.setId(3L);
+        ingredient.setRecipe(recipe);
+        recipe.setId(1L);
+        recipe.getIngredients().add(ingredient);
+
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
+
+        ingredientService.deleteById(1L, 3L);
+
+        verify(recipeRepository, times(1)).findById(anyLong());
+        verify(recipeRepository, times(1)).save(any(Recipe.class));
     }
 }
