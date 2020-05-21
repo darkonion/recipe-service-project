@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import recipe.project.recipe.converters.RecipeCommandToRecipe;
 import recipe.project.recipe.converters.RecipeToRecipeCommand;
 import recipe.project.recipe.domain.Recipe;
+import recipe.project.recipe.exceptions.NotFoundException;
 import recipe.project.recipe.repositories.RecipeRepository;
 
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -80,6 +82,13 @@ class RecipeServiceImplTest {
 
         verify(recipeRepository, times(1)).findById(anyLong());
         verify(recipeRepository, never()).findAll();
+    }
+
+    @Test
+    void findByIdTestNotFound() throws Exception {
+        Optional<Recipe> recipeOptional = Optional.empty();
+        when(recipeRepository.findById(anyLong())).thenReturn(recipeOptional);
+        assertThrows(NotFoundException.class, () -> recipeService.findById(1L));
     }
 
     @Test
